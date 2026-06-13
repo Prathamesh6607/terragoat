@@ -1,0 +1,17 @@
+# .checkov.yaml
+directory:
+  - terraform/aws
+
+framework:
+  - terraform
+
+output:
+  - cli
+  - sarif
+  - junitxml
+
+output-file-path: checkov-results/
+
+soft-fail: true       # start soft — change to false once baseline is clean
+compact: true
+download-external-modules: true
