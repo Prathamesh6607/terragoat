@@ -1,0 +1,53 @@
+name: Checkov IaC Security Scan
+
+on:
+push:
+branches:
+- main
+- feat/*
+pull_request:
+
+permissions:
+contents: read
+security-events: write
+
+jobs:
+checkov-scan:
+name: Checkov Security Validation
+runs-on: ubuntu-latest
+
+```
+steps:
+  - name: Checkout Repository
+    uses: actions/checkout@v4
+
+  - name: Run Checkov Scan
+    uses: bridgecrewio/checkov-action@master
+    with:
+      directory: terraform/aws
+      framework: terraform
+
+      # Security Gate
+      check: CKV_AWS_20,CKV_AWS_21,CKV_AWS_18,CKV_AWS_79
+
+      # Display findings in logs
+      output_format: cli,sarif
+
+      # Generate SARIF report
+      output_file_path: console,results/checkov.sarif
+
+      # Fail pipeline when checks fail
+      soft_fail: false
+
+  - name: Verify SARIF File
+    if: always()
+    run: |
+      echo "Generated Reports:"
+      find . -name "*.sarif"
+
+  - name: Upload SARIF Results
+    if: always()
+    uses: github/codeql-action/upload-sarif@v3
+    with:
+      sarif_file: results/checkov.sarif
+```
